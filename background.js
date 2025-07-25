@@ -4,7 +4,7 @@ chrome.runtime.onMessage.addListener((msg) => {
       type: "basic",
       iconUrl: "128.png",
       title: "Lizard Focus Tracker",
-      message: "Great job! You've focused for 25 minutes. Take a break!"
+      message: "Great job! You've completed your session. Take a break!"
     });
   }
 });
