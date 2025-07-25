@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lizard Focus Tracker</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; width: 300px; }
+    #status { margin-top: 10px; font-size: 14px; }
+    #timer { font-size: 24px; font-weight: bold; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Lizard</h1>
+  <button id="startBtn">Start Focus Session</button>
+  <div id="status">Status: Not started</div>
+  <div id="timer">00:00:00</div>
+
+  <video id="webcam" autoplay playsinline width="280" height="200" style="display:none;"></video>
+
+  <script src="faceFocus.js"></script>
+</body>
+</html>
