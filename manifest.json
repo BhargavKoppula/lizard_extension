@@ -3,7 +3,7 @@
   "name": "Lizard Focus Tracker",
   "version": "1.0",
   "description": "Tracks your focus based on webcam activity, tab visibility, and user interaction.",
-  "permissions": ["tabs", "storage"],
+  "permissions": ["tabs", "storage", "idle", "notifications"],
   "host_permissions": ["<all_urls>"],
   "action": {
     "default_popup": "popup.html",
@@ -13,7 +13,14 @@
       "128": "128.png"
     }
   },
-  "background": {
-    "service_worker": "background.js"
+  "web_accessible_resources": [
+  {
+    "resources": ["128.png"],
+    "matches": ["<all_urls>"]
   }
+],
+"background": {
+  "service_worker": "background.js"
+  }
+
 }

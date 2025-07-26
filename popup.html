@@ -3,11 +3,7 @@
 <head>
   <title>Lizard Focus Tracker</title>
   <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-      width: 300px;
-    }
+    body { font-family: sans-serif; padding: 20px; width: 300px; }
     button {
       padding: 10px 15px;
       border: none;
@@ -16,41 +12,24 @@
       font-weight: bold;
       margin-top: 10px;
     }
-    #startBtn {
-      background-color: #28a745;
-    }
-    #stopBtn {
-      background-color: #dc3545;
-      display: none;
-    }
-    select {
-      margin-top: 10px;
-      padding: 5px;
-      width: 100%;
-    }
-    #status {
-      margin-top: 15px;
-      font-size: 14px;
-    }
-    #timer {
-      font-size: 24px;
-      font-weight: bold;
-      margin-top: 10px;
-    }
+    #startBtn { background-color: #28a745; }
+    #stopBtn { background-color: #dc3545; display: none; }
+    select, input { margin-top: 10px; padding: 5px; width: 100%; }
+    #status { margin-top: 15px; font-size: 14px; }
+    #timer { font-size: 24px; font-weight: bold; margin-top: 10px; }
   </style>
 </head>
 <body>
-  <h2>Lizard</h2>
+  <h2>🦎 Lizard Focus</h2>
 
   <label for="sessionDuration">Select Focus Time:</label>
   <select id="sessionDuration">
     <option value="1500">25 min (Pomodoro)</option>
-    <option value="2700">45 min (Deep Work)</option>
+    <option value="2700">45 min</option>
     <option value="3600">60 min</option>
     <option value="custom">Custom...</option>
   </select>
-
-  <input type="number" id="customDuration" placeholder="Enter seconds" style="margin-top: 10px; display: none;" />
+  <input type="number" id="customDuration" placeholder="Enter seconds" style="display: none;" />
 
   <button id="startBtn">Start Focus Session</button>
   <button id="stopBtn">Stop</button>
@@ -58,8 +37,6 @@
   <div id="status">Status: Not started</div>
   <div id="timer">00:00:00</div>
 
-  <video id="webcam" autoplay playsinline width="280" height="200" style="display:none;"></video>
-
-  <script src="faceFocus.js"></script>
+  <script src="popup.js"></script>
 </body>
 </html>
