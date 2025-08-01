@@ -6,25 +6,32 @@ document.addEventListener('DOMContentLoaded', () => {
   const statusEl = document.getElementById("status");
   const timerEl = document.getElementById("timer");
 
+  const statsBlock = document.createElement('div');
+  statsBlock.id = "stats";
+  statsBlock.style.marginTop = "20px";
+  document.body.appendChild(statsBlock);
+
   let sessionDuration = 1500;
   let focusTime = 0;
+  let totalTime = 0;
   let interval = null;
   let stream = null;
   let lastActivityTime = Date.now();
   let isPaused = false;
+  let focusLog = [];
+  let sessionStartTime = null;
 
   function formatTime(sec) {
-    const h = String(Math.floor(sec / 3600)).padStart(2, '0');
-    const m = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
+    const m = String(Math.floor(sec / 60)).padStart(2, '0');
     const s = String(sec % 60).padStart(2, '0');
-    return `${h}:${m}:${s}`;
+    return `${m}:${s}`;
   }
 
   function resetActivityTimer() {
     lastActivityTime = Date.now();
     if (isPaused) {
-      statusEl.textContent = "Status: 🟢 Resumed";
       isPaused = false;
+      statusEl.textContent = "Status: 🟢 Resumed";
     }
   }
 
@@ -33,38 +40,64 @@ document.addEventListener('DOMContentLoaded', () => {
     const now = Date.now();
     const idleTime = (now - lastActivityTime) / 1000;
 
-    if (idleTime > inactiveThreshold || document.hidden) {
-      isPaused = true;
-      statusEl.textContent = "Status: ⏸️ Inactive";
-    }
+    isPaused = idleTime > inactiveThreshold || document.hidden;
+    statusEl.textContent = isPaused ? "Status: ⏸️ Inactive" : "Status: 🟢 Focused";
+  }
+
+  function logFocusState() {
+    const state = isPaused ? "unfocused" : "focused";
+    focusLog.push({ second: totalTime, state });
+    if (!isPaused) focusTime++;
+  }
+
+  function showStats() {
+    const unfocusedTime = sessionDuration - focusTime;
+    const focusPercent = Math.round((focusTime / sessionDuration) * 100);
+    const unfocusPercent = 100 - focusPercent;
+
+    const start = new Date(sessionStartTime).toLocaleTimeString();
+    const end = new Date(sessionStartTime + sessionDuration * 1000).toLocaleTimeString();
+
+    statsBlock.innerHTML = `
+      <h3>📊 Session Summary</h3>
+      <p>🟢 Focused: ${formatTime(focusTime)} (${focusPercent}%)</p>
+      <p>⏸️ Unfocused: ${formatTime(unfocusedTime)} (${unfocusPercent}%)</p>
+      <p>🕒 Start: ${start}</p>
+      <p>🏁 End: ${end}</p>
+    `;
   }
 
   function startTimer() {
     focusTime = 0;
+    totalTime = 0;
+    focusLog = [];
+    sessionStartTime = Date.now();
+
     interval = setInterval(() => {
       checkInactivity();
-      if (!isPaused) {
-        focusTime++;
-        timerEl.textContent = formatTime(focusTime);
+      logFocusState();
 
-        if (focusTime >= sessionDuration) {
-          clearInterval(interval);
-          if (stream) {
-            stream.getTracks().forEach(t => t.stop());
-            stream = null;
-          }
+      totalTime++;
+      timerEl.textContent = formatTime(totalTime);
 
-          chrome.notifications?.create({
-            type: "basic",
-            iconUrl: "128.png",
-            title: "Lizard",
-            message: "Great job! You've focused for your full session. Take a break!"
-          });
-
-          statusEl.textContent = "Status: ✅ Completed";
-          startBtn.disabled = false;
-          stopBtn.style.display = "none";
+      if (totalTime >= sessionDuration) {
+        clearInterval(interval);
+        if (stream) {
+          stream.getTracks().forEach(t => t.stop());
+          stream = null;
         }
+
+        chrome.notifications?.create({
+          type: "basic",
+          iconUrl: "128.png",
+          title: "Lizard",
+          message: "Great job! You've completed your focus session!"
+        });
+
+        statusEl.textContent = "Status: ✅ Session Complete";
+        startBtn.disabled = false;
+        stopBtn.style.display = "none";
+        showStats();
       }
     }, 1000);
   }
@@ -81,17 +114,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function stopSession() {
-    if (interval) clearInterval(interval);
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-      stream = null;
-    }
-    interval = null;
-    focusTime = 0;
-    timerEl.textContent = "00:00:00";
-    statusEl.textContent = "Status: 🔴 Stopped";
+function stopSession() {
+  if (interval) clearInterval(interval);
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
+    stream = null;
   }
+  interval = null;
+
+  // Still log the current state before ending
+  logFocusState();
+
+  statusEl.textContent = "Status: 🛑 Session Stopped";
+  timerEl.textContent = formatTime(totalTime);
+  stopBtn.style.display = "none";
+  startBtn.disabled = false;
+
+  showStats();  // <-- This will now show the summary even when user stops early
+}
 
   sessionDropdown.addEventListener("change", () => {
     if (sessionDropdown.value === "custom") {
@@ -114,6 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     startBtn.disabled = true;
     stopBtn.style.display = "inline-block";
+    statsBlock.innerHTML = "";
     startWebcamAndSession();
   });
 
@@ -123,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
     stopBtn.style.display = "none";
   });
 
-  // 🔁 Track activity
+  // Track user activity
   document.addEventListener("mousemove", resetActivityTimer);
   document.addEventListener("click", resetActivityTimer);
   document.addEventListener("keydown", resetActivityTimer);
