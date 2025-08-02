@@ -20,6 +20,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let isPaused = false;
   let focusLog = [];
   let sessionStartTime = null;
+  // let faceDetector;
+  let faceVisible = false;
+  let videoElement;
+
 
   function formatTime(sec) {
     const m = String(Math.floor(sec / 60)).padStart(2, '0');
@@ -34,15 +38,28 @@ document.addEventListener('DOMContentLoaded', () => {
       statusEl.textContent = "Status: 🟢 Resumed";
     }
   }
+window.addEventListener("mousemove", resetActivityTimer);
+window.addEventListener("keydown", resetActivityTimer);
 
-  function checkInactivity() {
-    const inactiveThreshold = 10; // seconds
-    const now = Date.now();
-    const idleTime = (now - lastActivityTime) / 1000;
+function checkInactivity() {
+  const inactiveThreshold = 10; // seconds
+  const now = Date.now();
 
-    isPaused = idleTime > inactiveThreshold || document.hidden;
-    statusEl.textContent = isPaused ? "Status: ⏸️ Inactive" : "Status: 🟢 Focused";
+  const idleTime = (now - lastActivityTime) / 1000;
+  const userIdle = idleTime > inactiveThreshold || document.hidden;
+  const faceNotVisible = !faceVisible;
+
+  isPaused = userIdle || faceNotVisible;
+
+  if (faceNotVisible && !userIdle) {
+    statusEl.textContent = "Status: ❌ No Face Detected";
+  } else if (userIdle) {
+    statusEl.textContent = "Status: ⏸️ Inactive";
+  } else {
+    statusEl.textContent = "Status: 🟢 Focused";
   }
+}
+
 
   function logFocusState() {
     const state = isPaused ? "unfocused" : "focused";
@@ -102,17 +119,68 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1000);
   }
 
-  async function startWebcamAndSession() {
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      statusEl.textContent = "Status: 🟢 Webcam active";
-      resetActivityTimer();
-      startTimer();
-    } catch (err) {
-      console.error("Webcam access denied", err);
-      statusEl.textContent = "Status: ❌ Webcam access denied";
-    }
+let faceDetector;
+// let faceVisible = false;
+// let videoElement;
+
+async function startWebcamAndSession() {
+  try {
+    videoElement = document.createElement('video');
+    videoElement.style.display = "none";
+    document.body.appendChild(videoElement);
+
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    videoElement.srcObject = stream;
+    videoElement.play();
+
+    faceDetector = new FaceDetection({
+      locateFile: (file) => file
+    });
+
+    faceDetector.setOptions({
+      model: 'short',
+      minDetectionConfidence: 0.5
+    });
+
+    faceDetector.onResults((results) => {
+      faceVisible = results.detections.length > 0;
+    });
+
+    const camera = new Camera(videoElement, {
+      onFrame: async () => {
+        await faceDetector.send({ image: videoElement });
+      },
+      width: 640,
+      height: 480
+    });
+
+    camera.start();
+
+    statusEl.textContent = "Status: 🟢 Webcam active";
+    resetActivityTimer();
+    startTimer();
+
+  } catch (err) {
+    console.error("Webcam access denied", err);
+    statusEl.textContent = "Status: ❌ Webcam access denied";
   }
+  let faceVisible = false;
+
+  const faceDetector = new FaceDetection({
+  locateFile: (file) => file
+  });
+
+  faceDetector.setOptions({
+  model: 'short',
+  minDetectionConfidence: 0.5
+  });
+
+  faceDetector.onResults((results) => {
+  faceVisible = results.detections && results.detections.length > 0;
+  console.log("Face visible?", faceVisible);
+  });
+
+}
 
 function stopSession() {
   if (interval) clearInterval(interval);
@@ -163,6 +231,7 @@ function stopSession() {
     startBtn.disabled = false;
     stopBtn.style.display = "none";
   });
+  
 
   // Track user activity
   document.addEventListener("mousemove", resetActivityTimer);
