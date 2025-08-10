@@ -1,43 +1,48 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Lizard Focus Tracker</title>
+  <meta charset="utf-8" />
+  <title>Lizard Focus</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; width: 300px; }
-    button {
-      padding: 10px 15px;
-      border: none;
-      border-radius: 5px;
-      color: white;
-      font-weight: bold;
-      margin-top: 10px;
-    }
-    #startBtn { background-color: #28a745; }
-    #stopBtn { background-color: #dc3545; display: none; }
-    select, input { margin-top: 10px; padding: 5px; width: 100%; }
-    #status { margin-top: 15px; font-size: 14px; }
-    #timer { font-size: 24px; font-weight: bold; margin-top: 10px; }
+    body { font-family: Arial, sans-serif; padding: 16px; width: 320px; }
+    h2 { margin: 0 0 10px 0; }
+    .controls { margin: 10px 0; }
+    button { padding: 10px 14px; border: none; border-radius: 6px; color: #fff; font-weight: 600; }
+    #startBtn { background:#28a745; }
+    #stopBtn { background:#dc3545; display:none; margin-left:10px;}
+    select, input { width:100%; padding:8px; margin-top:8px; box-sizing:border-box; }
+    #status { margin-top:12px; font-size:14px; }
+    #timer { font-size:28px; font-weight:700; margin-top:6px; }
+    #stats { margin-top:14px; background:#f9f9f9; padding:10px; border-radius:6px; font-size:13px; }
+    #history { margin-top:12px; font-size:13px; max-height:140px; overflow:auto; }
   </style>
 </head>
 <body>
-  <h2>🦎 Lizard Focus</h2>
+  <h2>🦎 Lizard</h2>
 
-  <label for="sessionDuration">Select Focus Time:</label>
-  <select id="sessionDuration">
-    <option value="1500">25 min (Pomodoro)</option>
-    <option value="2700">45 min</option>
-    <option value="3600">60 min</option>
-    <option value="custom">Custom...</option>
-  </select>
-  <input type="number" id="customDuration" placeholder="Enter seconds" style="display: none;" />
+  <div class="controls">
+    <label>Select Focus Time</label>
+    <select id="sessionDuration">
+      <option value="1500">25 min (Pomodoro)</option>
+      <option value="2700">45 min</option>
+      <option value="3600">60 min</option>
+      <option value="custom">Custom (seconds)</option>
+    </select>
+    <input id="customDuration" type="number" placeholder="Custom seconds" style="display:none;" />
+    <div style="margin-top:8px;">
+      <button id="startBtn">Start</button>
+      <button id="stopBtn">Stop</button>
+    </div>
+  </div>
 
-  <button id="startBtn">Start Focus Session</button>
-  <button id="stopBtn">Stop</button>
+  <div id="status">Status: Idle</div>
+  <div id="timer">00:00</div>
 
-  <div id="status">Status: Not started</div>
-  <div id="timer">00:00:00</div>
-  <script src="face_detection.js"></script>
-  <script src="camera_utils.js"></script>
+  <div id="stats"></div>
+
+  <h4 style="margin-top:12px;">Recent Sessions</h4>
+  <div id="history">Loading...</div>
+
   <script src="popup.js"></script>
 </body>
 </html>

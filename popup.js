@@ -1,241 +1,110 @@
-document.addEventListener('DOMContentLoaded', () => {
+// popup.js
+document.addEventListener("DOMContentLoaded", () => {
   const startBtn = document.getElementById("startBtn");
   const stopBtn = document.getElementById("stopBtn");
   const sessionDropdown = document.getElementById("sessionDuration");
   const customInput = document.getElementById("customDuration");
   const statusEl = document.getElementById("status");
   const timerEl = document.getElementById("timer");
-
-  const statsBlock = document.createElement('div');
-  statsBlock.id = "stats";
-  statsBlock.style.marginTop = "20px";
-  document.body.appendChild(statsBlock);
-
-  let sessionDuration = 1500;
-  let focusTime = 0;
-  let totalTime = 0;
-  let interval = null;
-  let stream = null;
-  let lastActivityTime = Date.now();
-  let isPaused = false;
-  let focusLog = [];
-  let sessionStartTime = null;
-  // let faceDetector;
-  let faceVisible = false;
-  let videoElement;
-
-
-  function formatTime(sec) {
-    const m = String(Math.floor(sec / 60)).padStart(2, '0');
-    const s = String(sec % 60).padStart(2, '0');
-    return `${m}:${s}`;
-  }
-
-  function resetActivityTimer() {
-    lastActivityTime = Date.now();
-    if (isPaused) {
-      isPaused = false;
-      statusEl.textContent = "Status: 🟢 Resumed";
-    }
-  }
-window.addEventListener("mousemove", resetActivityTimer);
-window.addEventListener("keydown", resetActivityTimer);
-
-function checkInactivity() {
-  const inactiveThreshold = 10; // seconds
-  const now = Date.now();
-
-  const idleTime = (now - lastActivityTime) / 1000;
-  const userIdle = idleTime > inactiveThreshold || document.hidden;
-  const faceNotVisible = !faceVisible;
-
-  isPaused = userIdle || faceNotVisible;
-
-  if (faceNotVisible && !userIdle) {
-    statusEl.textContent = "Status: ❌ No Face Detected";
-  } else if (userIdle) {
-    statusEl.textContent = "Status: ⏸️ Inactive";
-  } else {
-    statusEl.textContent = "Status: 🟢 Focused";
-  }
-}
-
-
-  function logFocusState() {
-    const state = isPaused ? "unfocused" : "focused";
-    focusLog.push({ second: totalTime, state });
-    if (!isPaused) focusTime++;
-  }
-
-  function showStats() {
-    const unfocusedTime = sessionDuration - focusTime;
-    const focusPercent = Math.round((focusTime / sessionDuration) * 100);
-    const unfocusPercent = 100 - focusPercent;
-
-    const start = new Date(sessionStartTime).toLocaleTimeString();
-    const end = new Date(sessionStartTime + sessionDuration * 1000).toLocaleTimeString();
-
-    statsBlock.innerHTML = `
-      <h3>📊 Session Summary</h3>
-      <p>🟢 Focused: ${formatTime(focusTime)} (${focusPercent}%)</p>
-      <p>⏸️ Unfocused: ${formatTime(unfocusedTime)} (${unfocusPercent}%)</p>
-      <p>🕒 Start: ${start}</p>
-      <p>🏁 End: ${end}</p>
-    `;
-  }
-
-  function startTimer() {
-    focusTime = 0;
-    totalTime = 0;
-    focusLog = [];
-    sessionStartTime = Date.now();
-
-    interval = setInterval(() => {
-      checkInactivity();
-      logFocusState();
-
-      totalTime++;
-      timerEl.textContent = formatTime(totalTime);
-
-      if (totalTime >= sessionDuration) {
-        clearInterval(interval);
-        if (stream) {
-          stream.getTracks().forEach(t => t.stop());
-          stream = null;
-        }
-
-        chrome.notifications?.create({
-          type: "basic",
-          iconUrl: "128.png",
-          title: "Lizard",
-          message: "Great job! You've completed your focus session!"
-        });
-
-        statusEl.textContent = "Status: ✅ Session Complete";
-        startBtn.disabled = false;
-        stopBtn.style.display = "none";
-        showStats();
-      }
-    }, 1000);
-  }
-
-let faceDetector;
-// let faceVisible = false;
-// let videoElement;
-
-async function startWebcamAndSession() {
-  try {
-    videoElement = document.createElement('video');
-    videoElement.style.display = "none";
-    document.body.appendChild(videoElement);
-
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    videoElement.srcObject = stream;
-    videoElement.play();
-
-    faceDetector = new FaceDetection({
-      locateFile: (file) => file
-    });
-
-    faceDetector.setOptions({
-      model: 'short',
-      minDetectionConfidence: 0.5
-    });
-
-    faceDetector.onResults((results) => {
-      faceVisible = results.detections.length > 0;
-    });
-
-    const camera = new Camera(videoElement, {
-      onFrame: async () => {
-        await faceDetector.send({ image: videoElement });
-      },
-      width: 640,
-      height: 480
-    });
-
-    camera.start();
-
-    statusEl.textContent = "Status: 🟢 Webcam active";
-    resetActivityTimer();
-    startTimer();
-
-  } catch (err) {
-    console.error("Webcam access denied", err);
-    statusEl.textContent = "Status: ❌ Webcam access denied";
-  }
-  let faceVisible = false;
-
-  const faceDetector = new FaceDetection({
-  locateFile: (file) => file
-  });
-
-  faceDetector.setOptions({
-  model: 'short',
-  minDetectionConfidence: 0.5
-  });
-
-  faceDetector.onResults((results) => {
-  faceVisible = results.detections && results.detections.length > 0;
-  console.log("Face visible?", faceVisible);
-  });
-
-}
-
-function stopSession() {
-  if (interval) clearInterval(interval);
-  if (stream) {
-    stream.getTracks().forEach(track => track.stop());
-    stream = null;
-  }
-  interval = null;
-
-  // Still log the current state before ending
-  logFocusState();
-
-  statusEl.textContent = "Status: 🛑 Session Stopped";
-  timerEl.textContent = formatTime(totalTime);
-  stopBtn.style.display = "none";
-  startBtn.disabled = false;
-
-  showStats();  // <-- This will now show the summary even when user stops early
-}
+  const statsEl = document.getElementById("stats");
+  const historyEl = document.getElementById("history");
 
   sessionDropdown.addEventListener("change", () => {
     if (sessionDropdown.value === "custom") {
       customInput.style.display = "block";
     } else {
       customInput.style.display = "none";
-      sessionDuration = parseInt(sessionDropdown.value);
     }
   });
 
   startBtn.addEventListener("click", () => {
-    if (sessionDropdown.value === "custom") {
-      const val = parseInt(customInput.value);
-      if (!val || val <= 0) {
-        alert("Enter a valid custom duration.");
+    let duration = sessionDropdown.value;
+    if (duration === "custom") {
+      duration = parseInt(customInput.value, 10);
+      if (!duration || duration <= 0) {
+        alert("Enter a valid duration in seconds.");
         return;
       }
-      sessionDuration = val;
+    } else {
+      duration = parseInt(duration, 10);
     }
-
-    startBtn.disabled = true;
-    stopBtn.style.display = "inline-block";
-    statsBlock.innerHTML = "";
-    startWebcamAndSession();
+    chrome.runtime.sendMessage({ type: "start_focus", duration }, (res) => {
+      startBtn.disabled = true;
+      stopBtn.style.display = "inline-block";
+      statusEl.textContent = "Status: Started";
+      statsEl.innerHTML = "";
+    });
   });
 
   stopBtn.addEventListener("click", () => {
-    stopSession();
-    startBtn.disabled = false;
-    stopBtn.style.display = "none";
+    chrome.runtime.sendMessage({ type: "stop_focus" }, (res) => {
+      startBtn.disabled = false;
+      stopBtn.style.display = "none";
+      statusEl.textContent = "Status: Stopped (summary below)";
+    });
   });
-  
 
-  // Track user activity
-  document.addEventListener("mousemove", resetActivityTimer);
-  document.addEventListener("click", resetActivityTimer);
-  document.addEventListener("keydown", resetActivityTimer);
-  document.addEventListener("visibilitychange", resetActivityTimer);
+  // Receive live updates and final session summary
+  chrome.runtime.onMessage.addListener((msg) => {
+    if (!msg || !msg.type) return;
+    if (msg.type === "update_time") {
+      timerEl.textContent = msg.time;
+      statusEl.textContent = msg.active ? "Status: 🟢 Focused" : "Status: ⚠️ Unfocused";
+    } else if (msg.type === "session_complete") {
+      displaySummary(msg.summary);
+      // reload history
+      loadHistory();
+      startBtn.disabled = false;
+      stopBtn.style.display = "none";
+    }
+  });
+
+  // Query status when popup opens
+  chrome.runtime.sendMessage({ type: "get_status" }, (resp) => {
+    if (resp && resp.time) {
+      timerEl.textContent = resp.time;
+      if (resp.running) {
+        startBtn.disabled = true;
+        stopBtn.style.display = "inline-block";
+      } else {
+        startBtn.disabled = false;
+        stopBtn.style.display = "none";
+      }
+    }
+  });
+
+  function displaySummary(summary) {
+    statsEl.innerHTML = `
+      <strong>Session Summary</strong>
+      <div>Focused: ${formatSec(summary.focusedSeconds)} (${summary.focusedPct}%)</div>
+      <div>Unfocused: ${formatSec(summary.unfocusedSeconds)}</div>
+      <div>Start: ${new Date(summary.startTime).toLocaleString()}</div>
+      <div>End: ${new Date(summary.endTime).toLocaleString()}</div>
+    `;
+  }
+
+  function formatSec(s) {
+    const m = Math.floor(s/60);
+    const sec = s%60;
+    return `${m}m ${sec}s`;
+  }
+
+  // Load recent sessions history
+  function loadHistory() {
+    chrome.storage.local.get({ sessions: [] }, (res) => {
+      const sessions = res.sessions || [];
+      if (!sessions.length) {
+        historyEl.innerHTML = "<div>No sessions yet.</div>";
+        return;
+      }
+      historyEl.innerHTML = sessions.slice(0,8).map(sess => {
+        return `<div style="padding:6px 0;border-bottom:1px solid #eee;">
+          <div><strong>${formatSec(sess.focusedSeconds)} focused</strong> (${sess.focusedPct}%)</div>
+          <div style="font-size:12px;color:#666">${new Date(sess.startTime).toLocaleString()}</div>
+        </div>`;
+      }).join("");
+    });
+  }
+
+  loadHistory();
 });

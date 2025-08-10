@@ -2,9 +2,19 @@
   "manifest_version": 3,
   "name": "Lizard Focus Tracker",
   "version": "1.0",
-  "description": "Tracks your focus based on webcam activity, tab visibility, and user interaction.",
-  "permissions": ["tabs", "storage", "idle", "notifications"],
+  "description": "Track focus using browser activity. Logs focused/unfocused periods, shows stats, and rewards streaks.",
+  "permissions": [
+    "tabs",
+    "storage",
+    "notifications",
+    "idle",
+    "alarms",
+    "activeTab"
+  ],
   "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
@@ -13,14 +23,16 @@
       "128": "128.png"
     }
   },
-  "web_accessible_resources": [
-  {
-    "resources": ["128.png"],
-    "matches": ["<all_urls>"]
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content_script.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "16.png",
+    "48": "48.png",
+    "128": "128.png"
   }
-],
-"background": {
-  "service_worker": "background.js"
-  }
-
 }
