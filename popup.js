@@ -86,7 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function formatSec(s) {
     const m = Math.floor(s/60);
     const sec = s%60;
-    return `${m}m ${sec}s`;
+    return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
   }
 
   // Load recent sessions history

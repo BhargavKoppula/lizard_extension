@@ -8,7 +8,7 @@ let session = {
   focusSeconds: 0,    // seconds when considered focused
   focusLog: [],       // [{second:0, state:"focused"|"unfocused"}, ...]
   startTime: null,
-  lastActivityAt: 0,  // timestamp of last activity ping from content_script
+  lastActivityAt: Date.now(),  // timestamp of last activity ping from content_script
   checkIntervalId: null,
   inactivityThreshold: 10 // seconds without activity => unfocused
 };
