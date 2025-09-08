@@ -85,35 +85,53 @@ function tickSession() {
   if (!session.running) return;
   session.elapsed++;
 
-  // Determine focused/unfocused:
+  const gracePeriod = 5;
+  let isFocused;
+
+  if (session.elapsed <= gracePeriod) {
+    // During grace period, always count as focused
+    isFocused = true;
+    session.focusLog.push({ second: session.elapsed - 1, state: "focused" });
+    session.focusSeconds++;
+    chrome.runtime.sendMessage({
+      type: "update_time",
+      time: formatTimeSec(session.elapsed),
+      active: true
+    });
+
+    if (session.elapsed >= session.duration) {
+      endSession();
+    }
+    return;
+  }
+
+  // After grace period → normal checks
   const now = Date.now();
   const idleSec = (now - session.lastActivityAt) / 1000;
   const userIdle = idleSec > session.inactivityThreshold;
 
-  // Also check active tab visibility - query active tab and check attention
   chrome.windows.getLastFocused({ populate: true }, (win) => {
     let tabActive = true;
     if (!win || win.focused === false) tabActive = false;
 
-    // focused only when user not idle and window/tab active
-    const isFocused = !userIdle && tabActive;
+    isFocused = !userIdle && tabActive;
     session.focusLog.push({ second: session.elapsed - 1, state: isFocused ? "focused" : "unfocused" });
     if (isFocused) session.focusSeconds++;
 
-    // Broadcast update to popup(s)
-    const payload = {
+    // Broadcast update
+    chrome.runtime.sendMessage({
       type: "update_time",
       time: formatTimeSec(session.elapsed),
       active: isFocused
-    };
-    chrome.runtime.sendMessage(payload);
+    });
 
-    // If finished:
+    // If session is over
     if (session.elapsed >= session.duration) {
-      endSession(); // will clear interval
+      endSession();
     }
   });
 }
+
 
 // Start a session: duration in seconds
 function startSession(durationSec) {
