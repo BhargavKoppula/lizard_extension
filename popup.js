@@ -54,6 +54,8 @@ document.addEventListener("DOMContentLoaded", () => {
       displaySummary(msg.summary);
       // reload history
       loadHistory();
+      //reload points
+      loadPoints();  
       startBtn.disabled = false;
       stopBtn.style.display = "none";
     }
@@ -107,4 +109,28 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   loadHistory();
+  
+// loads points obtained
+  function loadPoints() {
+    chrome.storage.local.get({ points: 0 }, (res) => {
+      document.getElementById("pointsCounter").textContent = res.points || 0;
+    });
+  }
+
+  loadPoints();
+
+// loads last session summary
+  function loadLastSession() {
+  chrome.storage.local.get({ sessions: [] }, (res) => {
+    const sessions = res.sessions || [];
+    if (sessions.length > 0) {
+      displaySummary(sessions[0]); // show most recent
+    } else {
+      statsEl.innerHTML = "<div>No sessions yet.</div>";
+    }
+  });
+}
+
+loadLastSession();
+
 });
