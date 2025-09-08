@@ -43,9 +43,16 @@ function saveSessionRecord(record) {
 // Gamification: add points and update streaks
 function awardPointsAndStreaks(record) {
   const pointsEarned = Math.max(1, Math.round(record.focusedSeconds / 60)); // 1 point per focused minute
+
+  // NEW: award at least 1 point if completed with 80%+ focus
+  if (record.focusedPct >= 80 && pointsEarned < 1) {
+    pointsEarned = 1;
+  }
+
   chrome.storage.local.get({ points: 0, streaks: {} }, (res) => {
     const newPoints = (res.points || 0) + pointsEarned;
     const streaks = res.streaks || {};
+
     // Update streak: if focusedSeconds >= 25min (1500s) counts as a day completed
     const completedToday = record.focusedSeconds >= 1500;
     const todayKey = new Date(record.startTime).toISOString().slice(0,10);
@@ -163,6 +170,15 @@ function stopSession() {
   session.focusSeconds = 0;
   session.startTime = null;
   session.lastActivityAt = 0;
+
+  // notification after session stopped
+  chrome.notifications.create({
+  type: "basic",
+  iconUrl: "128.png",   
+  title: "Focus Session Complete ✅",
+  message: `You stayed focused for ${record.focusedPct}% of your session!`
+});
+
 }
 
 // End session naturally (complete)
@@ -193,6 +209,15 @@ function endSession() {
   session.focusSeconds = 0;
   session.startTime = null;
   session.lastActivityAt = 0;
+
+  // notification after session ended
+  chrome.notifications.create({
+  type: "basic",
+  iconUrl: "128.png",   
+  title: "Focus Session Complete ✅",
+  message: `You stayed focused for ${record.focusedPct}% of your session!`
+});
+  
 }
 
 // Handle messages from popup / content script
