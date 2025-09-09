@@ -29,3 +29,26 @@ body.active-mode {
 body.reading-mode {
   background: linear-gradient(135deg, #d4edda, #c3e6cb); /* greenish */
 }
+#weeklyStats {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+#weeklyChart {
+  display: block;
+  margin: 0 auto;
+}
+.streak-day {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  background: #eee;
+}
+
+.streak-day.active {
+  background: #4caf50; /* focused day */
+}
+
+.streak-day.inactive {
+  background: #ddd; /* no session */
+}

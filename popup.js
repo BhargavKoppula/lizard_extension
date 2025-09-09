@@ -65,10 +65,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-
-
-
-
   // Receive live updates and final session summary
   chrome.runtime.onMessage.addListener((msg) => {
     if (!msg || !msg.type) return;
@@ -185,6 +181,132 @@ function loadWeeklyStats() {
 }
 
 loadWeeklyStats();
+
+function loadWeeklyStats() {
+  chrome.storage.local.get({ sessions: [] }, (res) => {
+    const sessions = res.sessions || [];
+    const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+
+    // Filter last 7 days
+    const lastWeek = sessions.filter(s => s.startTime >= oneWeekAgo);
+
+    if (lastWeek.length === 0) {
+      document.getElementById("weeklyStats").innerHTML = "<div>No sessions this week.</div>";
+      return;
+    }
+
+    const totalFocused = lastWeek.reduce((sum, s) => sum + (s.focusedSeconds || 0), 0);
+    const totalDuration = lastWeek.reduce((sum, s) => sum + (s.duration || 0), 0);
+    const avgFocus = totalDuration > 0 ? Math.round((totalFocused / totalDuration) * 100) : 0;
+
+    document.getElementById("weeklyStats").innerHTML = `
+      <div>Total Focused: <strong>${Math.floor(totalFocused/60)} min</strong></div>
+      <div>Average Focus: <strong>${avgFocus}%</strong></div>
+      <div>Sessions: <strong>${lastWeek.length}</strong></div>
+    `;
+
+    // --- Chart data ---
+    const days = Array(7).fill(0);
+
+lastWeek.forEach(s => {
+  const d = new Date(s.startTime);
+  const dayIndex = d.getDay(); // 0=Sun ... 6=Sat
+  days[dayIndex] += Math.floor((s.focusedSeconds || 0) / 60); // minutes
+});
+
+
+    drawWeeklyChart(days);
+  });
+}
+
+// chart of weekly stats
+function drawWeeklyChart(data) {
+  const canvas = document.getElementById("weeklyChart");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const barWidth = 25;
+  const gap = 10;
+  const maxVal = Math.max(...data, 1);
+  const labels = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+  data.forEach((val, i) => {
+    const x = i * (barWidth + gap) + 15;
+    const h = (val / maxVal) * 100;
+    ctx.fillStyle = "#4caf50";
+    ctx.fillRect(x, 120 - h, barWidth, h);
+    ctx.fillStyle = "#333";
+    ctx.font = "10px sans-serif";
+    ctx.fillText(labels[i], x, 115);
+  });
+}
+loadWeeklyStats();
+
+// loads calander streaks
+function loadStreaks() {
+  chrome.storage.local.get({ streaks: {} }, (res) => {
+    const streaks = res.streaks || {};
+    const today = new Date();
+    const days = [];
+
+    // Show last 28 days
+    for (let i = 27; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const key = d.toISOString().slice(0,10);
+      days.push({ date: key, active: !!streaks[key] });
+    }
+
+    // Fill streak grid
+    const grid = document.getElementById("streakGrid");
+    grid.innerHTML = "";
+    days.forEach(day => {
+      const box = document.createElement("div");
+      box.className = "streak-day " + (day.active ? "active" : "inactive");
+      grid.appendChild(box);
+    });
+
+    // Compute streak numbers
+    let currentStreak = 0;
+    let longestStreak = 0;
+    let tempStreak = 0;
+
+    const allDates = Object.keys(streaks).sort();
+    const oneDay = 24*60*60*1000;
+
+    for (let i = 0; i < allDates.length; i++) {
+      if (streaks[allDates[i]]) {
+        if (i > 0) {
+          const prev = new Date(allDates[i-1]);
+          const curr = new Date(allDates[i]);
+          if ((curr - prev) <= oneDay * 1.5) {
+            tempStreak++;
+          } else {
+            tempStreak = 1;
+          }
+        } else {
+          tempStreak = 1;
+        }
+        if (tempStreak > longestStreak) longestStreak = tempStreak;
+      }
+    }
+
+    // Compute current streak ending today
+    currentStreak = 0;
+    let check = new Date(today);
+    while (streaks[check.toISOString().slice(0,10)]) {
+      currentStreak++;
+      check.setDate(check.getDate() - 1);
+    }
+
+    document.getElementById("streakStats").innerHTML = `
+      <div>Current Streak: <strong>${currentStreak} days</strong></div>
+      <div>Longest Streak: <strong>${longestStreak} days</strong></div>
+    `;
+  });
+}
+loadStreaks();
 
 
 });

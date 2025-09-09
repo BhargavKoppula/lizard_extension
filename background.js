@@ -55,7 +55,10 @@ function awardPointsAndStreaks(record) {
     const streaks = res.streaks || {};
 
     // Update streak: if focusedSeconds >= 25min (1500s) counts as a day completed
-    const completedToday = record.focusedSeconds >= 1500;
+    const completedToday = (
+      record.focusedSeconds >= 1500 || // 25 min rule
+      record.focusedPct >= 80          // OR 80% focus in any session
+    );
     const todayKey = new Date(record.startTime).toISOString().slice(0,10);
     if (completedToday) {
       streaks[todayKey] = true;
