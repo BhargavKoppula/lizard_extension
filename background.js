@@ -10,8 +10,9 @@ let session = {
   startTime: null,
   lastActivityAt: Date.now(),  // timestamp of last activity ping from content_script
   checkIntervalId: null,
-  inactivityThreshold: 10 // seconds without activity => unfocused
+  inactivityThreshold: 15 // seconds without activity => unfocused
 };
+
 
 // Utility
 function formatTimeSec(sec) {
@@ -237,6 +238,18 @@ function endSession() {
 });
   
 }
+
+// toggle button logic
+let userMode = "active"; // default
+
+chrome.runtime.onMessage.addListener((msg) => {
+  if (msg.type === "toggle_mode") {
+    userMode = msg.mode; // "active" or "reading"
+    session.inactivityThreshold = (userMode === "reading") ? 90 : 15;
+  }
+});
+
+
 
 // Handle messages from popup / content script
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {

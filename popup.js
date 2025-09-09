@@ -43,6 +43,18 @@ document.addEventListener("DOMContentLoaded", () => {
       statusEl.textContent = "Status: Stopped (summary below)";
     });
   });
+  
+  //toggle button
+  const toggleBtn = document.getElementById("mode-toggle");
+    let currentMode = "active";
+
+    toggleBtn.addEventListener("click", () => {
+      currentMode = (currentMode === "active") ? "reading" : "active";
+      toggleBtn.textContent = currentMode === "active" ? "Switch to Reading Mode" : "Switch to Active Mode";
+
+      chrome.runtime.sendMessage({ type: "toggle_mode", mode: currentMode });
+    });
+
 
   // Receive live updates and final session summary
   chrome.runtime.onMessage.addListener((msg) => {
@@ -109,7 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   loadHistory();
-  
+
 // loads points obtained
   function loadPoints() {
     chrome.storage.local.get({ points: 0 }, (res) => {
