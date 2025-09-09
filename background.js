@@ -133,7 +133,6 @@ function tickSession() {
   });
 }
 
-
 // Start a session: duration in seconds
 function startSession(durationSec) {
   if (session.running) return;
@@ -248,6 +247,22 @@ chrome.runtime.onMessage.addListener((msg) => {
     session.inactivityThreshold = (userMode === "reading") ? 90 : 15;
   }
 });
+
+chrome.runtime.onMessage.addListener((msg) => {
+  if (msg.type === "notify_mode") {
+    const mode = msg.mode;
+    chrome.notifications.create({
+      type: "basic",
+      iconUrl: "48.png",
+      title: mode === "active" ? "Active Mode" : "Reading Mode",
+      message: mode === "active"
+        ? "Strict 15s idle limit – stay hands-on!"
+        : "Relaxed 90s idle limit – perfect for reading.",
+      priority: 0
+    });
+  }
+});
+
 
 
 

@@ -23,3 +23,9 @@ button:disabled {
   margin-top: 15px;
   font-size: 14px;
 }
+body.active-mode {
+  background: linear-gradient(135deg, #fff3cd, #ffeeba); /* yellowish */
+}
+body.reading-mode {
+  background: linear-gradient(135deg, #d4edda, #c3e6cb); /* greenish */
+}

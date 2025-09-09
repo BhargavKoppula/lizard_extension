@@ -51,9 +51,22 @@ document.addEventListener("DOMContentLoaded", () => {
     toggleBtn.addEventListener("click", () => {
       currentMode = (currentMode === "active") ? "reading" : "active";
       toggleBtn.textContent = currentMode === "active" ? "Switch to Reading Mode" : "Switch to Active Mode";
-
-      chrome.runtime.sendMessage({ type: "toggle_mode", mode: currentMode });
+      updatePopupMode(currentMode);
+      chrome.runtime.sendMessage({ type: "notify_mode", mode: currentMode });
     });
+
+    // changes the color of popup according to the mode
+    function updatePopupMode(mode) {
+      document.body.classList.remove("active-mode", "reading-mode");
+      if (mode === "active") {
+        document.body.classList.add("active-mode");
+      } else if (mode === "reading") {
+        document.body.classList.add("reading-mode");
+      }
+    }
+
+
+
 
 
   // Receive live updates and final session summary
@@ -144,5 +157,34 @@ document.addEventListener("DOMContentLoaded", () => {
 }
 
 loadLastSession();
+
+// loads weekly stats
+function loadWeeklyStats() {
+  chrome.storage.local.get({ sessions: [] }, (res) => {
+    const sessions = res.sessions || [];
+    const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+
+    const lastWeek = sessions.filter(s => s.startTime >= oneWeekAgo);
+
+    if (lastWeek.length === 0) {
+      document.getElementById("weeklyStats").innerHTML = "<div>No sessions this week.</div>";
+      return;
+    }
+
+    const totalFocused = lastWeek.reduce((sum, s) => sum + (s.focusedSeconds || 0), 0);
+    const totalDuration = lastWeek.reduce((sum, s) => sum + (s.duration || 0), 0);
+    const avgFocus = totalDuration > 0 ? Math.round((totalFocused / totalDuration) * 100) : 0;
+
+    document.getElementById("weeklyStats").innerHTML = `
+      <strong>Weekly Stats</strong>
+      <div>Total Focused: ${Math.floor(totalFocused/60)} min</div>
+      <div>Average Focus: ${avgFocus}%</div>
+      <div>Sessions: ${lastWeek.length}</div>
+    `;
+  });
+}
+
+loadWeeklyStats();
+
 
 });
