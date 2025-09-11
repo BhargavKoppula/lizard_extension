@@ -22,9 +22,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (duration === "custom") {
       duration = parseInt(customInput.value, 10);
       if (!duration || duration <= 0) {
-        alert("Enter a valid duration in seconds.");
+        alert("Enter a valid duration in minutes.");
         return;
       }
+      duration = duration * 60; // convert minutes → seconds ✅
     } else {
       duration = parseInt(duration, 10);
     }
@@ -231,19 +232,35 @@ function drawWeeklyChart(data) {
 
   const barWidth = 25;
   const gap = 10;
-  const maxVal = Math.max(...data, 1);
+
+  // Fixed max value for scale (e.g. 5 hours = 300 min)
+  const maxVal = 150; 
   const labels = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
   data.forEach((val, i) => {
     const x = i * (barWidth + gap) + 15;
-    const h = (val / maxVal) * 100;
+    const h = Math.min((val / maxVal) * 100, 100); // scale to max 100px height
+
+    // Draw bar
     ctx.fillStyle = "#4caf50";
     ctx.fillRect(x, 120 - h, barWidth, h);
+
+    // Day label
     ctx.fillStyle = "#333";
     ctx.font = "10px sans-serif";
     ctx.fillText(labels[i], x, 115);
+
+    // Minutes label above bar
+    if (val > 0) {
+      ctx.fillStyle = "#000";
+      ctx.font = "10px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(`${val}m`, x + barWidth / 2, 110 - h);
+    }
   });
 }
+
+
 loadWeeklyStats();
 
 // loads calander streaks
