@@ -180,6 +180,8 @@ function stopSession() {
   // save record and award gamification
   saveSessionRecord(record);
   awardPointsAndStreaks(record);
+  checkAchievements(record);
+
 
   // send final update to popup
   chrome.runtime.sendMessage({ type: "session_complete", summary: record });
@@ -220,6 +222,8 @@ function endSession() {
 
   saveSessionRecord(record);
   awardPointsAndStreaks(record);
+  checkAchievements(record);
+
 
   chrome.runtime.sendMessage({ type: "session_complete", summary: record });
 
@@ -265,6 +269,39 @@ chrome.runtime.onMessage.addListener((msg) => {
     });
   }
 });
+
+// this is for checking the achievements
+function checkAchievements(record) {
+  chrome.storage.local.get({ achievements: {}, sessions: [] }, (res) => {
+    const achievements = res.achievements || {};
+    const sessions = res.sessions || [];
+
+    // First session
+    if (sessions.length >= 1 && !achievements.firstSession) {
+      achievements.firstSession = true;
+    }
+
+    // 5 sessions
+    if (sessions.length >= 5 && !achievements.fiveSessions) {
+      achievements.fiveSessions = true;
+    }
+
+    // 10 hours focused (36000 seconds)
+    const totalFocused = sessions.reduce((sum, s) => sum + (s.focusedSeconds || 0), 0);
+    if (totalFocused >= 36000 && !achievements.tenHours) {
+      achievements.tenHours = true;
+    }
+
+    // 5-day streak
+    const streakKeys = Object.keys(res.streaks || {});
+    const streakCount = streakKeys.length;
+    if (streakCount >= 5 && !achievements.fiveDayStreak) {
+      achievements.fiveDayStreak = true;
+    }
+
+    chrome.storage.local.set({ achievements });
+  });
+}
 
 
 

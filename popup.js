@@ -77,6 +77,8 @@ document.addEventListener("DOMContentLoaded", () => {
       loadHistory();
       //reload points
       loadPoints();  
+      //session note
+      enableNoteForLastSession();
       startBtn.disabled = false;
       stopBtn.style.display = "none";
     }
@@ -124,6 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return `<div style="padding:6px 0;border-bottom:1px solid #eee;">
           <div><strong>${formatSec(sess.focusedSeconds)} focused</strong> (${sess.focusedPct}%)</div>
           <div style="font-size:12px;color:#666">${new Date(sess.startTime).toLocaleString()}</div>
+          ${sess.note ? `<div style="font-size:12px;color:#444">📝 ${sess.note}</div>` : ""}
         </div>`;
       }).join("");
     });
@@ -307,6 +310,51 @@ function loadStreaks() {
   });
 }
 loadStreaks();
+
+//load achievements
+function loadAchievements() {
+  chrome.storage.local.get({ achievements: {} }, (res) => {
+    const ach = res.achievements || {};
+    const el = document.getElementById("achievements");
+
+    const list = [
+      { key: "firstSession", label: "First Session 🎯" },
+      { key: "fiveSessions", label: "5 Sessions 🔥" },
+      { key: "tenHours", label: "10 Hours Focused ⏳" },
+      { key: "fiveDayStreak", label: "5-Day Streak 📅" }
+    ];
+
+    el.innerHTML = list.map(a => `
+      <div class="achievement">
+        <span>${ach[a.key] ? "✅" : "⬜"}</span> ${a.label}
+      </div>
+    `).join("");
+  });
+}
+loadAchievements();
+
+function enableNoteForLastSession() {
+  const noteDiv = document.getElementById("sessionNote");
+  noteDiv.style.display = "block";
+
+  document.getElementById("saveNoteBtn").onclick = () => {
+    const note = document.getElementById("noteInput").value.trim();
+    if (!note) return;
+
+    chrome.storage.local.get({ sessions: [] }, (res) => {
+      const sessions = res.sessions || [];
+      if (sessions.length > 0) {
+        sessions[0].note = note; // add note to the latest session
+        chrome.storage.local.set({ sessions }, () => {
+          noteDiv.style.display = "none"; // hide after saving
+          document.getElementById("noteInput").value = "";
+          loadHistory(); // reload history with note
+        });
+      }
+    });
+  };
+}
+
 
 
 });

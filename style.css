@@ -52,3 +52,14 @@ body.reading-mode {
 .streak-day.inactive {
   background: #ddd; /* no session */
 }
+.achievement {
+  display: flex;
+  align-items: center;
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.achievement span {
+  font-size: 18px;
+  margin-right: 6px;
+}
