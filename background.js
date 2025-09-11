@@ -129,6 +129,17 @@ function tickSession() {
       active: isFocused
     });
 
+    // Check if user idle for more than 5 minutes (300s)
+if (userIdle && idleSec >= 300 && !session.notifiedIdle) {
+  chrome.notifications.create({
+    type: "basic",
+    iconUrl: "128.png",
+    title: "Still there? ⚠️",
+    message: "You've been inactive for 5 minutes. Time to refocus?",
+    priority: 0
+  });
+  session.notifiedIdle = true; // prevent repeat spam
+}
     // If session is over
     if (session.elapsed >= session.duration) {
       endSession();
@@ -145,9 +156,8 @@ function startSession(durationSec) {
   session.focusSeconds = 0;
   session.focusLog = [];
   session.startTime = Date.now();
-
-  // initialize lastActivityAt with now so first seconds count as focused if user is active
-  session.lastActivityAt = Date.now();
+  session.lastActivityAt = Date.now(); // initialize lastActivityAt with now so first seconds count as focused if user is active
+  session.notifiedIdle = false;
 
   // Start tick every second
   session.checkIntervalId = setInterval(tickSession, 1000);
@@ -193,6 +203,8 @@ function stopSession() {
   session.focusSeconds = 0;
   session.startTime = null;
   session.lastActivityAt = 0;
+  session.notifiedIdle = false;
+  
 
   // notification after session stopped
   chrome.notifications.create({
@@ -210,6 +222,7 @@ function endSession() {
   if (session.checkIntervalId) clearInterval(session.checkIntervalId);
   session.running = false;
   session.checkIntervalId = null;
+  session.notifiedIdle = false;
 
   const summary = computeSummary();
   const record = {
@@ -330,6 +343,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     // content_script pings active user activity
     session.lastActivityAt = msg.time || Date.now();
     // optional: wake the session if previously idle (we still continue)
+    session.notifiedIdle = false; // reset so future idle can notify again
   }
   // return true to indicate async response if needed
 });

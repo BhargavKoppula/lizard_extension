@@ -63,3 +63,30 @@ body.reading-mode {
   font-size: 18px;
   margin-right: 6px;
 }
+
+/* dark mode */
+body.dark {
+  background: #121212;
+  color: #eee;
+}
+
+body.dark h3,
+body.dark h4,
+body.dark strong {
+  color: #fff;
+}
+
+body.dark #history div,
+body.dark #stats,
+body.dark #weeklyStats,
+body.dark #streakStats,
+body.dark #achievements {
+  color: #ddd;
+}
+
+body.dark input,
+body.dark button {
+  background: #333;
+  color: #fff;
+  border: 1px solid #555;
+}

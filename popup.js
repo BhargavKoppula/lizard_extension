@@ -333,6 +333,7 @@ function loadAchievements() {
 }
 loadAchievements();
 
+// this funcion just enables it to give a when only the session ends when popup is open
 function enableNoteForLastSession() {
   const noteDiv = document.getElementById("sessionNote");
   noteDiv.style.display = "block";
@@ -355,6 +356,51 @@ function enableNoteForLastSession() {
   };
 }
 
+// this part is code is to check if last session has a note if not it will give an option to add
+function checkLastSessionForNote() {
+  chrome.storage.local.get({ sessions: [] }, (res) => {
+    const sessions = res.sessions || [];
+    if (sessions.length > 0 && !sessions[0].note) {
+      // show note box
+      const noteDiv = document.getElementById("sessionNote");
+      noteDiv.style.display = "block";
+
+      document.getElementById("saveNoteBtn").onclick = () => {
+        const note = document.getElementById("noteInput").value.trim();
+        if (!note) return;
+
+        sessions[0].note = note;
+        chrome.storage.local.set({ sessions }, () => {
+          noteDiv.style.display = "none";
+          document.getElementById("noteInput").value = "";
+          loadHistory();
+        });
+      };
+    }
+  });
+}
+checkLastSessionForNote();
+
+
+//dark mode logic
+function initDarkMode() {
+  const btn = document.getElementById("darkModeBtn");
+
+  // Load saved preference
+  chrome.storage.local.get({ darkMode: false }, (res) => {
+    if (res.darkMode) {
+      document.body.classList.add("dark");
+      btn.textContent = "☀️";
+    }
+  });
+
+  btn.addEventListener("click", () => {
+    const isDark = document.body.classList.toggle("dark");
+    btn.textContent = isDark ? "☀️" : "🌙";
+    chrome.storage.local.set({ darkMode: isDark });
+  });
+}
+initDarkMode();
 
 
 });
