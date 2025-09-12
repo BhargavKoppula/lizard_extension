@@ -3,80 +3,194 @@
 <head>
   <meta charset="utf-8" />
   <title>Lizard Focus</title>
+  <link rel="stylesheet" href="style.css">
   <style>
-    body { font-family: Arial, sans-serif; padding: 16px; width: 320px; }
-    h2 { margin: 0 0 10px 0; }
-    .controls { margin: 10px 0; }
-    button { padding: 10px 14px; border: none; border-radius: 6px; color: #fff; font-weight: 600; }
-    #startBtn { background:#28a745; }
-    #stopBtn { background:#dc3545; display:none; margin-left:10px;}
-    select, input { width:100%; padding:8px; margin-top:8px; box-sizing:border-box; }
-    #status { margin-top:12px; font-size:14px; }
-    #timer { font-size:28px; font-weight:700; margin-top:6px; }
-    #stats { margin-top:14px; background:#f9f9f9; padding:10px; border-radius:6px; font-size:13px; }
-    #history { margin-top:12px; font-size:13px; max-height:140px; overflow:auto; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #eee;
+      margin: 0;
+      padding: 10px;
+      width: 360px;
+      font-size: 13px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 10px;
+      background: #1c1c1c;
+      border: 2px solid #2d2;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    .header img {
+      height: 32px;
+    }
+    .header .points {
+      font-size: 12px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .card {
+      background: #1c1c1c;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 8px;
+    }
+    .card h4 {
+      margin: 0 0 6px 0;
+      font-size: 13px;
+      color: #9f9;
+    }
+    #timer {
+      font-size: 50px;
+      font-weight: bold;
+      margin: 6px 0;
+      color: #9f9;
+    }
+    button {
+      padding: 6px 10px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    #startBtn { background: #28a745; color: white; width: 100%; margin-top: 6px; }
+    #stopBtn { background: #dc3545; color: white; width: 100%; margin-top: 6px; display: none; }
+    select, input {
+      width: 100%;
+      padding: 6px;
+      margin: 4px 0;
+      font-size: 12px;
+    }
+    #history div {
+      padding: 4px 0;
+      border-bottom: 1px solid #333;
+      font-size: 12px;
+    }
+    canvas {
+      width: 100%;
+      height: 80px;
+    }
+    .note-box {
+      margin-top: 6px;
+    }
+    .note-box input {
+      width: 75%;
+      padding: 4px;
+      font-size: 12px;
+      border-radius: 6px;
+    }
+    .note-box button {
+      background-color: #4caf50;
+      padding: 4px 6px;
+      font-size: 12px;
+    }
+    .streak-day {
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  background: #333; /* default inactive color */
+}
+
+.streak-day.active {
+  background: #4caf50; /* green for active */
+}
+
+.streak-day.inactive {
+  background: #222; /* dark gray for inactive */
+}
+#streakGrid {
+  display: flex;
+  flex-wrap: wrap;
+  width: 160px;
+  gap: 4px;
+  margin-top: 8px;
+}
+#weeklyChart {
+  width: 100% !important;
+  height: 120px !important;
+  background: #111;
+  border-radius: 6px;
+}
+
   </style>
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-  <h3 style="margin:0;">Lizard</h3>
-  <button id="darkModeBtn" style="padding:4px 8px;font-size:12px;">🌙</button>
-</div>
-
 </head>
-<link rel="stylesheet" href="style.css">
 <body>
-  <h2>Lizard</h2>
+  <!-- Header with Logo + Points -->
+  <div class="header">
+    <img src="lizard text logo.png" alt="Lizard Logo">
+    <div class="points">Points: <span id="pointsCounter">0</span></div>
+  </div>
 
-  <div class="controls">
-    <label>Select Focus Time</label>
+<div class="grid">
+  <!-- Controls -->
+  <div class="card">
+    <h4>Set Focus Time</h4>
     <select id="sessionDuration">
-      <option value="1500">25 min (Pomodoro)</option>
+      <option value="1500">25 min</option>
       <option value="2700">45 min</option>
       <option value="3600">60 min</option>
       <option value="custom">Custom (minutes)</option>
     </select>
     <input id="customDuration" type="number" placeholder="Custom minutes" style="display:none;" />
-    <div style="margin-top:8px;">
-      <button id="startBtn">Start</button>
-      <button id="stopBtn">Stop</button>
+    <button id="mode-toggle">Switch to Reading Mode</button>
+    <button id="startBtn">Start</button>
+    <button id="stopBtn">Stop</button>
+  </div>
+
+  <!-- Timer -->
+  <div class="card">
+    <div id="timer">00:00</div>
+    <div id="status">Status: Idle</div>
+  </div>
+
+  <!-- Session Summary -->
+  <div class="card" style="grid-column: span 2;">
+    <h4>Session Summary</h4>
+    <div id="stats">No session yet.</div>
+    <div id="sessionNote" class="note-box" style="display:none;">
+      <input id="noteInput" type="text" placeholder="Add a note...">
+      <button id="saveNoteBtn">Save</button>
     </div>
   </div>
-  <button id="mode-toggle" style="margin-top:10px; background:#202dea; padding:8px; border-radius:6px;">Reading Mode</button>
 
-
-  <div id="status">Status: Idle</div>
-  <div id="timer">00:00</div>
-
-  <div id="stats">hi</div>
-  <div id="sessionNote" style="margin-top:10px; display:none;">
-    <input id="noteInput" type="text" placeholder="Add a note (e.g., Reading, Coding, Design)" style="width: 80%; padding: 4px; font-size: 13px;">
-    <button id="saveNoteBtn" style="padding: 4px 8px; font-size: 13px;">Save</button>
-  </div>
-  <div id="pointsBox" style="margin-top:10px; background:#eef9f1; padding:8px; border-radius:6px; font-size:13px;">
-    <strong>Total Points:</strong> <span id="pointsCounter">0</span>
+  <!-- Streaks FIRST (was lower before) -->
+  <div class="card">
+    <h4>Streaks</h4>
+    <div id="streakStats">Loading...</div>
+    <div id="streakGrid" style="display:flex;flex-wrap:wrap;width:140px;gap:2px;margin-top:6px;"></div>
   </div>
 
-  
+  <!-- Recent Sessions (last 4 only) -->
+  <div class="card">
+    <h4>Recent Sessions</h4>
+    <div id="history">Loading...</div>
+  </div>
 
+  <!-- Weekly Report -->
+  <div class="card" style="grid-column: span 2;">
+    <h4>Weekly Report</h4>
+    <canvas id="weeklyChart" width="175" height="120" style="max-width:50%;"></canvas>
+  </div>
 
-  <h4 style="margin-top:12px;">Recent Sessions</h4>
-  <div id="history">Loading...</div>
-  
-  <h4 style="margin-top:12px;">Weekly Stats</h4>
-  <div id="weeklyStats">Loading...</div>
+  <!-- Weekly Stats (smaller card, moved down) -->
+  <div class="card">
+    <h4>Weekly Stats</h4>
+    <div id="weeklyStats">Loading...</div>
+  </div>
 
-  <h4 style="margin-top:12px;">Weekly Report</h4>
-  <!-- <div id="weeklyStats">Loading...</div> -->
-  <canvas id="weeklyChart" width="250" height="120"></canvas>
-
-
-  <h4 style="margin-top:12px;">Streaks</h4>
-  <div id="streakStats">Loading...</div>
-  <div id="streakGrid" style="display:flex;flex-wrap:wrap;width:210px;gap:2px;margin-top:8px;"></div>
-
-  <!-- achievements -->
-  <h4 style="margin-top:12px;">Achievements</h4>
-  <div id="achievements">Loading...</div>
-
+  <!-- Achievements -->
+  <div class="card">
+    <h4>Achievements</h4>
+    <div id="achievements">Loading...</div>
+  </div>
+</div>
 
 
   <script src="popup.js"></script>

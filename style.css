@@ -1,92 +1,190 @@
+/* Global */
 body {
-  font-family: Arial, sans-serif;
-  width: 300px;
+  margin: 0;
+  font-family: "Inter", "Roboto", sans-serif;
+  background: #111;
+  color: #eee;
+  width: 380px;
   padding: 10px;
-  background: #f0f4f8;
 }
-.container {
+
+.popup-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Cards */
+.card {
+  background: #1a1a1a;
+  border: 2px solid #4b5d32;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+h3 {
+  margin: 0 0 6px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #9acd32;
+}
+
+.grid {
+  display: grid;
+  gap: 10px;
+}
+.grid.two-col {
+  grid-template-columns: 1fr 1fr;
+}
+.center {
   text-align: center;
 }
-button {
-  padding: 10px 15px;
-  margin: 10px;
-  border: none;
-  border-radius: 8px;
-  background: #007bff;
-  color: white;
-  cursor: pointer;
-}
-button:disabled {
-  background: #ccc;
-}
-#summary {
-  margin-top: 15px;
-  font-size: 14px;
-}
-body.active-mode {
-  background: linear-gradient(135deg, #fff3cd, #ffeeba); /* yellowish */
-}
-body.reading-mode {
-  background: linear-gradient(135deg, #d4edda, #c3e6cb); /* greenish */
-}
-#weeklyStats {
-  font-size: 14px;
-  margin-bottom: 8px;
-}
 
-#weeklyChart {
-  display: block;
-  margin: 0 auto;
-}
-.streak-day {
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
-  background: #eee;
-}
-
-.streak-day.active {
-  background: #4caf50; /* focused day */
-}
-
-.streak-day.inactive {
-  background: #ddd; /* no session */
-}
-.achievement {
+/* Header */
+.header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  margin: 4px 0;
-  font-size: 14px;
+  background: #1a1a1a;
+  border: 2px solid #4b5d32;
+  padding: 8px 12px;
+  border-radius: 10px;
 }
 
-.achievement span {
-  font-size: 18px;
-  margin-right: 6px;
+.logo {
+  height: 40px;
 }
 
-/* dark mode */
-body.dark {
-  background: #121212;
-  color: #eee;
-}
-
-body.dark h3,
-body.dark h4,
-body.dark strong {
-  color: #fff;
-}
-
-body.dark #history div,
-body.dark #stats,
-body.dark #weeklyStats,
-body.dark #streakStats,
-body.dark #achievements {
+.points {
+  font-size: 13px;
+  font-weight: 500;
   color: #ddd;
 }
 
-body.dark input,
-body.dark button {
-  background: #333;
+/* Timer */
+.timer {
+  font-size: 36px;
+  font-weight: bold;
+  color: #cddc39;
+}
+.status {
+  font-size: 13px;
+  margin-top: 4px;
+  color: #aaa;
+}
+
+/* Buttons */
+.buttons {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+}
+.btn {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.btn.start {
+  background: #28a745;
   color: #fff;
-  border: 1px solid #555;
+}
+.btn.stop {
+  background: #dc3545;
+  color: #fff;
+}
+.btn.save {
+  background: #4b5d32;
+  color: #fff;
+  margin-top: 6px;
+}
+
+/* Dropdown */
+.dropdown, input[type="number"] {
+  width: 100%;
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #4b5d32;
+  margin-top: 6px;
+  background: #2a2a2a;
+  color: #fff;
+}
+
+/* Mode Switch */
+.mode-switch {
+  margin: 12px 0;
+  text-align: center;
+}
+.switch {
+  width: 60px;
+  height: 28px;
+  background: #ffa500;
+  border-radius: 20px;
+  display: inline-block;
+  position: relative;
+  cursor: pointer;
+}
+#modeToggle:checked + .switch {
+  background: #4caf50;
+}
+.mode-label {
+  font-size: 12px;
+  margin-top: 4px;
+  color: #bbb;
+}
+
+/* Textarea */
+textarea {
+  width: 100%;
+  min-height: 40px;
+  resize: none;
+  border-radius: 6px;
+  border: 1px solid #4b5d32;
+  padding: 6px;
+  margin-top: 6px;
+  background: #222;
+  color: #fff;
+}
+
+/* Achievements */
+.achievements-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 13px;
+}
+.achievements-list li {
+  margin: 4px 0;
+  display: flex;
+  align-items: center;
+}
+.achievements-list span {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  border: 1px solid #999;
+  border-radius: 3px;
+  background: #333;
+}
+.achievements-list .achieved {
+  background: #4caf50;
+  border: none;
+}
+
+/* Footer */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: #1a1a1a;
+  border: 2px solid #4b5d32;
+  border-radius: 10px;
+}
+.footer-img {
+  height: 40px;
+  border-radius: 6px;
 }

@@ -100,8 +100,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function displaySummary(summary) {
+    // <strong>Session Summary</strong>
     statsEl.innerHTML = `
-      <strong>Session Summary</strong>
       <div>Focused: ${formatSec(summary.focusedSeconds)} (${summary.focusedPct}%)</div>
       <div>Unfocused: ${formatSec(summary.unfocusedSeconds)}</div>
       <div>Start: ${new Date(summary.startTime).toLocaleString()}</div>
@@ -123,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
         historyEl.innerHTML = "<div>No sessions yet.</div>";
         return;
       }
-      historyEl.innerHTML = sessions.slice(0,8).map(sess => {
+      historyEl.innerHTML = sessions.slice(0,4).map(sess => {
         return `<div style="padding:6px 0;border-bottom:1px solid #eee;">
           <div><strong>${formatSec(sess.focusedSeconds)} focused</strong> (${sess.focusedPct}%)</div>
           <div style="font-size:12px;color:#666">${new Date(sess.startTime).toLocaleString()}</div>
