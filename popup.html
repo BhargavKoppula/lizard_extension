@@ -18,9 +18,9 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 6px 10px;
+      padding: 16px 10px;
       background: #1c1c1c;
-      border: 2px solid #2d2;
+      /* border: 2px solid #2d2; */
       border-radius: 8px;
       margin-bottom: 10px;
     }
@@ -118,8 +118,13 @@
   background: #111;
   border-radius: 6px;
 }
-
-  </style>
+#sessionDuration{
+  border-radius: 6px;
+}
+.footer{
+  align-items: center;
+}
+</style>
 </head>
 <body>
   <!-- Header with Logo + Points -->
@@ -163,8 +168,8 @@
   <!-- Streaks FIRST (was lower before) -->
   <div class="card">
     <h4>Streaks</h4>
-    <div id="streakStats">Loading...</div>
     <div id="streakGrid" style="display:flex;flex-wrap:wrap;width:140px;gap:2px;margin-top:6px;"></div>
+    <div id="streakStats">Loading...</div>
   </div>
 
   <!-- Recent Sessions (last 4 only) -->
@@ -176,7 +181,7 @@
   <!-- Weekly Report -->
   <div class="card" style="grid-column: span 2;">
     <h4>Weekly Report</h4>
-    <canvas id="weeklyChart" width="175" height="120" style="max-width:50%;"></canvas>
+    <canvas id="weeklyChart" width="340" height="120" style="max-width:100%;"></canvas>
   </div>
 
   <!-- Weekly Stats (smaller card, moved down) -->
@@ -195,4 +200,8 @@
 
   <script src="popup.js"></script>
 </body>
+<footer class="footer">
+  <img src="48.png" alt="Lizard Logo">
+  <div>Made with 💚 Bhargav Koppula</div>
+</footer>
 </html>

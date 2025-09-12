@@ -175,7 +175,7 @@ textarea {
 }
 
 /* Footer */
-.footer {
+/* .footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -187,4 +187,7 @@ textarea {
 .footer-img {
   height: 40px;
   border-radius: 6px;
-}
+} */
+ .footer{
+  align-items: center;
+ }

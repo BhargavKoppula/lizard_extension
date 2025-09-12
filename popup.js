@@ -125,9 +125,9 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       historyEl.innerHTML = sessions.slice(0,4).map(sess => {
         return `<div style="padding:6px 0;border-bottom:1px solid #eee;">
-          <div><strong>${formatSec(sess.focusedSeconds)} focused</strong> (${sess.focusedPct}%)</div>
-          <div style="font-size:12px;color:#666">${new Date(sess.startTime).toLocaleString()}</div>
-          ${sess.note ? `<div style="font-size:12px;color:#444">📝 ${sess.note}</div>` : ""}
+          <div style="color:#4caf50"><strong>${formatSec(sess.focusedSeconds)} focused</strong> (${sess.focusedPct}%)</div>
+          <div style="font-size:12px;color:#eee">${new Date(sess.startTime).toLocaleString()}</div>
+          ${sess.note ? `<div style="font-size:12px;color:#eaeaea">📝 ${sess.note}</div>` : ""}
         </div>`;
       }).join("");
     });
@@ -234,11 +234,12 @@ function drawWeeklyChart(data) {
   const gap = 10;
 
   // Fixed max value for scale (e.g. 5 hours = 300 min)
-  const maxVal = 150; 
+  // const maxVal = 150; 
+  const maxVal = Math.max(...data, 1); // at least 1
   const labels = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
   data.forEach((val, i) => {
-    const x = i * (barWidth + gap) + 15;
+    const x = i * (barWidth + gap) + 50;
     const h = Math.min((val / maxVal) * 100, 100); // scale to max 100px height
 
     // Draw bar
@@ -246,13 +247,13 @@ function drawWeeklyChart(data) {
     ctx.fillRect(x, 120 - h, barWidth, h);
 
     // Day label
-    ctx.fillStyle = "#333";
+    ctx.fillStyle = "#fff";
     ctx.font = "10px sans-serif";
     ctx.fillText(labels[i], x, 115);
 
     // Minutes label above bar
     if (val > 0) {
-      ctx.fillStyle = "#000";
+      ctx.fillStyle = "#fefefe";
       ctx.font = "10px sans-serif";
       ctx.textAlign = "center";
       ctx.fillText(`${val}m`, x + barWidth / 2, 110 - h);
