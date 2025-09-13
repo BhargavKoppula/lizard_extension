@@ -1,4 +1,4 @@
-/* Global */
+/* Global
 body {
   margin: 0;
   font-family: "Inter", "Roboto", sans-serif;
@@ -119,7 +119,7 @@ h3 {
 }
 .switch {
   width: 60px;
-  height: 28px;
+  height: 100px;
   background: #ffa500;
   border-radius: 20px;
   display: inline-block;
@@ -173,21 +173,6 @@ textarea {
   background: #4caf50;
   border: none;
 }
-
-/* Footer */
-/* .footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 12px;
-  background: #1a1a1a;
-  border: 2px solid #4b5d32;
-  border-radius: 10px;
-}
-.footer-img {
-  height: 40px;
-  border-radius: 6px;
-} */
  .footer{
   align-items: center;
- }
+ } 

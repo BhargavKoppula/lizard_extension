@@ -243,7 +243,7 @@ function drawWeeklyChart(data) {
     const h = Math.min((val / maxVal) * 100, 100); // scale to max 100px height
 
     // Draw bar
-    ctx.fillStyle = "#4caf50";
+    ctx.fillStyle = "#5a9a05";
     ctx.fillRect(x, 120 - h, barWidth, h);
 
     // Day label
@@ -401,24 +401,24 @@ checkLastSessionForNote();
 
 
 //dark mode logic
-function initDarkMode() {
-  const btn = document.getElementById("darkModeBtn");
+// function initDarkMode() {
+//   const btn = document.getElementById("darkModeBtn");
 
-  // Load saved preference
-  chrome.storage.local.get({ darkMode: false }, (res) => {
-    if (res.darkMode) {
-      document.body.classList.add("dark");
-      btn.textContent = "☀️";
-    }
-  });
+//   // Load saved preference
+//   chrome.storage.local.get({ darkMode: false }, (res) => {
+//     if (res.darkMode) {
+//       document.body.classList.add("dark");
+//       btn.textContent = "☀️";
+//     }
+//   });
 
-  btn.addEventListener("click", () => {
-    const isDark = document.body.classList.toggle("dark");
-    btn.textContent = isDark ? "☀️" : "🌙";
-    chrome.storage.local.set({ darkMode: isDark });
-  });
-}
-initDarkMode();
+//   btn.addEventListener("click", () => {
+//     const isDark = document.body.classList.toggle("dark");
+//     btn.textContent = isDark ? "☀️" : "🌙";
+//     chrome.storage.local.set({ darkMode: isDark });
+//   });
+// }
+// initDarkMode();
 
 
 });
